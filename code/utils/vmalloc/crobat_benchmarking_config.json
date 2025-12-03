@@ -1,0 +1,36 @@
+{
+    "nodes": [
+        {
+            "node": 4,
+            "mem_type": "DRAM"
+        },
+        {
+            "node": 5,
+            "mem_type": "DRAM"
+        },
+        {
+            "node": 6,
+            "mem_type": "DRAM"
+        },
+        {
+            "node": 7,
+            "mem_type": "DRAM"
+        },
+        {
+            "node": 12,
+            "mem_type": "HBM"
+        },
+        {
+            "node": 13,
+            "mem_type": "HBM"
+        },
+        {
+            "node": 14,
+            "mem_type": "HBM"
+        },
+        {
+            "node": 15,
+            "mem_type": "HBM"
+        }
+    ]
+}

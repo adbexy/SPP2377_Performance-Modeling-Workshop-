@@ -1,0 +1,6 @@
+[submodule "modules/SIMDOps"]
+	path = modules/SIMDOps
+	url = https://github.com/db-tu-dresden/SIMDOperators.git
+[submodule "modules/json"]
+	path = modules/json
+	url = https://github.com/nlohmann/json.git
