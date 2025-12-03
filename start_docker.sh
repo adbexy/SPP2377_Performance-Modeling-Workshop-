@@ -13,21 +13,21 @@ HOST_GID=$(id -g)
 # the host has to load this module for cpupower to work
 # and it has to provide the directory /lib/modules/...
 # as at least a readonly bind mount.
-sudo modprobe msr
+# sudo modprobe msr
 # Detect if the script was started with the sequence: "activates --build"
 # Also treat a lone "--build" arg as intent to build the image.
 
 # Only stop/remove the container if it already exists. This avoids errors
 # when there's no container with that name.
-if sudo docker ps -a --format '{{.Names}}' | grep -wq "${CONTAINER}"; then
+if docker ps -a --format '{{.Names}}' | grep -wq "${CONTAINER}"; then
 	echo "Stopping and removing any existing container $CONTAINER"
 	# If it's currently running, stop it first
-	if sudo docker ps --format '{{.Names}}' | grep -wq "${CONTAINER}"; then
-		sudo docker stop "${CONTAINER}"
+	if docker ps --format '{{.Names}}' | grep -wq "${CONTAINER}"; then
+		docker stop "${CONTAINER}"
 	else
 		echo "Container $CONTAINER exists but is not running; skipping stop"
 	fi
-	sudo docker rm "${CONTAINER}"
+	docker rm "${CONTAINER}"
 else
 	echo "No existing container named $CONTAINER; nothing to stop/remove"
 fi
@@ -44,14 +44,14 @@ done
 
 if [ "$DO_BUILD" -eq 1 ]; then
 	echo "Building docker image $TAG"
-	sudo docker build --tag "$TAG" \
+	docker build --tag "$TAG" \
 		--build-arg HOST_UID="$HOST_UID" \
 		--build-arg HOST_GID="$HOST_GID" \
 		.
 fi
 
 echo "Starting docker container $CONTAINER from image $TAG"
-sudo docker run \
+docker run \
 	-it \
 	--name $CONTAINER \
 	--privileged \
