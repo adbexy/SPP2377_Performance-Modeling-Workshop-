@@ -1,5 +1,12 @@
 #include "query.hpp"
 
+/**
+ * returns (
+ *    your result (from your optimized implementation),
+ *    the unoptimized, but reliable result,
+ *    the time it took to run your implementation
+ * )
+ */
 std::tuple<int64_t, int64_t, double> query(table_r &r, table_s &s) {
 
   // create intermediate buffers
@@ -160,13 +167,12 @@ int main() {
   const auto [fast_result, safe_result, seconds] = query(r, s);
   // Query finished
 
-  const double throughput =
-      (memory_amount / (1024.0 * 1024.0 * 1024.0)) / seconds;
+  const double throughput_Bps = memory_amount / seconds;
 
   std::cout << fast_result << std::endl
             << safe_result << std::endl
-            << throughput << std::endl
-            << throughput // the sescond throughput is for compatibility
+            << throughput_Bps << std::endl
+            << throughput_Bps // the sescond throughput is for compatibility
             << std::endl;
 
   if (fast_result == safe_result)
