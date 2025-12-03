@@ -28,4 +28,5 @@ cmake -DTESTING="$testing" -DCMAKE_BUILD_TYPE="$build_type" . > cmake_output.txt
 
 # cmake
 cmake --build . --target "$target"
-"./bin/$target" | tail -n4 > my_results
+"./bin/$target" | tee output
+tail -n4 output > my_results
