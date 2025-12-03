@@ -25,25 +25,28 @@ def get_file_names():
 
 @dataclass
 class Results:
+    user: str
     fast_result: int
     safe_result: int
     inner_throughput: float
     outer_throughput: float
 
-    def from_file(file):
-        lines = filter(len, file.read().split("\n"))
-        try:
-            fast_result, safe_result, inner_throughput, outer_throughput = lines
-            return Results(
-                int(fast_result),
-                int(safe_result),
-                float(inner_throughput),
-                float(outer_throughput),
-            )
-        except Exception as e:
-            print("could not read one results file...")
-            print(e.what())
-            return Results(0, 0, 0, 0)
+    def from_file_name(file_name):
+        user = get_user(file_name)
+        with open(file_name, "r") as file:
+            lines = filter(len, file.read().split("\n"))
+            try:
+                fast_result, safe_result, inner_throughput, outer_throughput = lines
+                return Results(
+                    user,
+                    int(fast_result),
+                    int(safe_result),
+                    float(inner_throughput),
+                    float(outer_throughput),
+                )
+            except Exception as e:
+                print(f"could not read results file\n  {file_name!r}\n  {e!r}")
+                return Results(user, 0, 0, 0, 0)
 
     def format(value, format):
         Gibi = format.endswith("G")
@@ -57,6 +60,7 @@ class Results:
         return result
 
     def __iter__(self):
+        yield self.user
         yield self.fast_result
         yield self.safe_result
         yield self.inner_throughput
@@ -77,21 +81,19 @@ class Results:
         return self.fast_result == self.safe_result
 
 def get_table(file_names):
-    result = {} # user: Results
-    for file_name in file_names:
-        user = get_user(file_name)
-        with open(file_name, "r") as file:
-            result[user] = Results.from_file(file)
-    return result
+    return [
+        Results.from_file_name(file_name)
+        for file_name in file_names
+    ]
 
 def main():
-    user = "user"
+    table = get_table(get_file_names())
     check = " ok "
-    result = Results("fast", "safe", "inner and", "outer throughput")
-    print(    f"{user:20} {check}{result:,,14,14}")
-    for user, result in get_table(get_file_names()).items():
+    result = Results("user", "fast", "safe", "inner and", "outer throughput")
+    print(    f"{check}{result:20,,,14,14}")
+    for result in table:
         check = " :) " if result.correct() else " :( "
-        print(f"{user:20} {check}{result:,, 8.3fG, 8.3fG}")
+        print(f"{check}{result:20,,, 8.3fG, 8.3fG}")
 
 if __name__ == "__main__":
     main()
