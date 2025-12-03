@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # not recursive, otherwise errors may occur
-git submodule update --init
+git submodule update --init --branch experimental
 
 # patch submodules urls (ssh-address -> https-address)
 cd modules/SIMDOps
