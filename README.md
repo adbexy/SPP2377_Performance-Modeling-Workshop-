@@ -4,7 +4,6 @@
 
 Clone the repository:
 
-TODO move to public repo
 ```
 https://github.com/adbexy/SPP2377_Performance-Modeling-Workshop-.git
 ```
@@ -40,26 +39,9 @@ If the commands terminate without any problems, we are ready to go!
 
 ## Write Your Own Code
 
-To set up your own program, create a new target `.cpp` file and a corresponding target for your code:
+To set up your own program, modify `code/query.cpp`!
 
-CMakeLists.txt:
-```
-set(SIMDOPS_CXX_STANDARD 20)
-create_target(
-    TARGET_NAME <your program>
-    OUT_PATH ${CMAKE_BINARY_DIR}
-    SRC_FILES code/<your .cpp source file>
-    INC_DIRECTORIES
-        modules/SIMDOps/include
-        code/utils
-    LIBRARIES
-    COMPILE_DEFS
-    COMPILE_OPTS
-    LINK_OPTS
-)
-```
-
-Then, use `./run.sh TESTING=[ON|OFF] BUILD_TYPE=[Debug|Release]` and change the default target in `run.sh`.
+Then, use `./run.sh TESTING=[ON|OFF] BUILD_TYPE=[Debug|Release]`.
 Your results will be used by `./competition.py` because they are in `my_result`
 in this format:
 
