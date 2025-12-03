@@ -58,6 +58,7 @@ docker run \
 	--cap-add=sys_nice \
 	--user "$HOST_UID:$HOST_GID" \
   	-v "$SCRIPT_DIR":/home/user:rw \
+	-v /tmp/workshop_lock/workshop.lock:/tmp/workshop_lock/workshop.lock:rw \
 	--mount type=bind,src=/lib/modules,target=/lib/modules,readonly \
 	$TAG
 
