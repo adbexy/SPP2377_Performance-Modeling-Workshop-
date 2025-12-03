@@ -12,7 +12,7 @@ for arg in "$@"; do
     esac
     case "$arg" in
         BUILD_TYPE=Debug|BUILD_TYPE=Release)
-            build_type="${arg#DEBUG=}"
+            build_type="${arg#BUILD_TYPE=}"
             ;;
     esac
 done
