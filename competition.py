@@ -89,11 +89,11 @@ def get_table(file_names):
 def main():
     table = get_table(get_file_names())
     check = " ok "
-    result = Results("user", "fast", "safe", "inner and", "outer throughput")
-    print(    f"{check}{result:20,,,14,14}")
+    result = Results("user", "fast", "safe", "throughput", "")
+    print(    f"{check}{result:20,,,>14,}")
     for result in table:
         check = " :) " if result.correct() else " :( "
-        print(f"{check}{result:20,,, 8.3fG, 8.3fG}")
+        print(f"{check}{result:20,,, 8.3fG,}")
 
 if __name__ == "__main__":
     main()
