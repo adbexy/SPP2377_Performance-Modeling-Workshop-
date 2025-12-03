@@ -55,7 +55,7 @@ in this format:
 Take care that the `my_result` file is found with this glob:
 
 ```bash
-ls /home/*/*/my_results
+ls /home/*/my_results
 ```
 
 Enjoy coding!

@@ -5,7 +5,7 @@ from glob import glob
 from dataclasses import dataclass
 
 file_name = "my_results"
-directory_pattern = "/home/*/*"
+directory_pattern = "/home/*"
 def get_user(file_name):
     # assumes a /home/<user>/... file_name pattern
     return file_name.split("/")[2]
