@@ -52,10 +52,13 @@ in this format:
 <throughput>
 ```
 
-Take care that the `my_result` file is found with this glob:
+Take care that the `my_result` file is found with either of these globs:
 
 ```bash
 ls /home/*/my_results
+ls /home/*/*/my_results
 ```
+
+(the first would be expected inside the docker, the second one outside)
 
 Enjoy coding!

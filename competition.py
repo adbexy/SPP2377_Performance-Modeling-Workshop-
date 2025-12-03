@@ -4,17 +4,24 @@ import os
 from glob import glob
 from dataclasses import dataclass
 
-file_name = "my_results"
-directory_pattern = "/home/*"
+glob_file_name = "my_results"
+directory_patterns = [
+    "/home/*/*",
+    "/home/*",
+]
 def get_user(file_name):
     # assumes a /home/<user>/... file_name pattern
     return file_name.split("/")[2]
 
 def get_file_names():
-    return glob(
-        f"{directory_pattern}/{file_name}",
-        recursive = True,
-    )
+    return [ # flatten the files from all the directory_patterns
+        file_name
+        for directory_pattern in directory_patterns
+        for file_name in glob(
+            f"{directory_pattern}/{glob_file_name}",
+            recursive = True,
+        )
+    ]
 
 @dataclass
 class Results:
