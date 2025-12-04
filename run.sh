@@ -28,5 +28,22 @@ cmake -DTESTING="$testing" -DCMAKE_BUILD_TYPE="$build_type" . > cmake_output.txt
 
 # cmake
 cmake --build . --target "$target"
-"./bin/$target" | tee output
-tail -n4 output > my_results
+
+if [ "$testing" = "OFF" ]; then
+    LOCK=/tmp/workshop_lock/workshop.lock
+    touch $LOCK
+
+    echo "Requesting exclusive access ..."
+    {
+		flock $fd
+        echo "Benchmarking"
+
+	    "./bin/$target" | tee output
+        tail -n4 output > my_results
+
+	} {fd}<$LOCK
+
+else
+    "./bin/$target" | tee output
+    tail -n4 output > my_results
+fi
