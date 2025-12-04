@@ -91,7 +91,12 @@ def main():
     check = " ok "
     result = Results("user", "fast", "safe", "throughput", "")
     print(    f"{check}{result:20,,,>14,}")
-    for result in table:
+    sorted_table = sorted(
+        table,
+        key = lambda result: result.outer_throughput,
+        reverse = True,
+    )
+    for result in sorted_table:
         check = " :) " if result.correct() else " :( "
         print(f"{check}{result:20,,, 8.3fG,}")
 
