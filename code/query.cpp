@@ -1,5 +1,60 @@
 #include "query.hpp"
 
+class Section {
+public:
+    std::string name;
+    size_t bytes;
+    stop_watch<std::allocator<stop_watch_round>> & watch;
+    double duration = -1.0;
+    bool primary;
+    static std::vector<Section> all_sections;
+
+    Section (
+        std::string name,
+        size_t bytes,
+        stop_watch<std::allocator<stop_watch_round>> & watch
+    ) : name(name),
+        bytes(bytes),
+        watch(watch),
+        primary(true)
+    {
+        watch.start_time();
+    }
+    Section (
+        const Section & section
+    ) : name(section.name),
+        bytes(section.bytes),
+        watch(section.watch),
+        duration(section.duration),
+        primary(false)
+    {
+    }
+
+    ~Section () {
+        if (primary) {
+            watch.stop_time();
+            duration = watch.get_cast_durations().back();
+            all_sections.push_back(*this); // saves a !primary copy
+        }
+    }
+
+    static void print() {
+        std::cout << "Sections:" << std::endl;
+        for (auto section : all_sections) {
+            double throughput = (
+                static_cast<double>(section.bytes) / (1ull << 30) / section.duration
+            );
+            printf(
+                "section %20s: %12.8f s -> %8.3f GiB/s\n",
+                section.name.c_str(),
+                section.duration,
+                throughput
+            );
+        }
+    }
+};
+std::vector<Section> Section::all_sections;
+
 /**
  * returns (
  *    your result (from your optimized implementation),
@@ -90,41 +145,81 @@ std::tuple<int64_t, int64_t, double> query(table_r &r, table_s &s) {
       clock_type::now(), 1};
   // stop query time (without thread creation and datageneration
   //    -> only compute throughput)
-  query_stop_watch.start_time();
+  { Section sec(
+    "build_intermediate_join_buffer",
+    3 * s.data_amount * sizeof(uint64_t),
+    query_stop_watch
+  );
 
   // build hastable single threaded, as it is hard to parallelize efficiently
   building(intermediate_join_buffer, s);
 
+  } { Section sec(
+    "prober_group",
+    r.data_amount * sizeof(uint32_t) + 3 * s.data_amount * sizeof(uint64_t),
+    query_stop_watch
+  );
   tm.run({"prober_group"});
 
+  }
+  size_t offset = 0;
+  { Section sec(
+    "mat_offset",
+    join_res.lengths.segment_count() * sizeof(size_t),
+    query_stop_watch
+  );
   // prepare offsets for materialization
   // (multiply is only possible with materialized columns)
-  size_t offset = 0;
   for (size_t i = 0; i < join_res.lengths.segment_count(); i++) {
     mat_offset[i] = offset;
     offset += std::get<0>(join_res.lengths.get_segment(i))[0];
   }
 
+  } { Section sec("materialize_a_and_b",
+    2 * (r.data_amount * sizeof(uint64_t) + (
+        join_res.lengths.size() +
+        join_res.positions.size() +
+        join_res.lengths.segment_count()
+    ) * sizeof(size_t)),
+    query_stop_watch
+  );
   tm.run({"materialize_a", "materialize_b"});
 
+  } { Section sec("manipulate_size", 3 * sizeof(size_t), query_stop_watch);
   // adjus size of preallocated columns after materialization
   // (actual size is now known)
   joint_a.manipulate_size(offset);
   joint_b.manipulate_size(offset);
   column_a_times_b.manipulate_size(offset);
 
+  } { Section sec("multiply",
+    2 * r.data_amount * sizeof(uint64_t),
+    query_stop_watch
+  );
   tm.run({"multiply"});
 
+  } { Section sec("reduce_add",
+    r.data_amount * sizeof(uint64_t),
+    query_stop_watch
+  );
   tm.run({"reduce_add"});
 
-  // finalize reduce add (add up partial sums from each segment)
+  }
   int64_t final_sum = 0;
+  { Section sec("final_sum",
+      reduced_ab.segment_count() * sizeof(uint64_t),
+      query_stop_watch
+  );
+  // finalize reduce add (add up partial sums from each segment)
   for (size_t i = 0; i < reduced_ab.segment_count(); i++) {
     auto [res_ptr, res_size] = reduced_ab.get_segment(i);
     final_sum += res_ptr[0];
   }
 
-  query_stop_watch.stop_time();
+  }
+  Section::print();
+  tm.print_timings();
+
   double duration = query_stop_watch.get_duration_sum<std::chrono::seconds>();
 
   int64_t safe_sum = checksum(r, s);
