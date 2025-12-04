@@ -17,7 +17,7 @@ for arg in "$@"; do
     esac
 done
 
-#set -ex
+set -e
 
 echo "Target:  $target"
 echo "Testing: $testing"
